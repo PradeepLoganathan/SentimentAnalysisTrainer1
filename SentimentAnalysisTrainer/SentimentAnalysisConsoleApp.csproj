@@ -17,9 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="2.0.1" />
-    <PackageReference Include="Microsoft.ML.OnnxConverter" Version="0.20.1" />
-    <PackageReference Include="Microsoft.ML.ONNXRuntime" Version="1.14.1" />
-    <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="2.0.1" />
   </ItemGroup>
   
 </Project>

@@ -5,6 +5,7 @@ using SentimentAnalysisConsoleApp.DataStructures;
 using Common;
 using static Microsoft.ML.DataOperationsCatalog;
 using Microsoft.ML.Transforms.Text;
+using Microsoft.ML.Trainers;
 
 namespace SentimentAnalysisConsoleApp
 {
@@ -42,13 +43,7 @@ namespace SentimentAnalysisConsoleApp
 
             // Train the model
             ITransformer trainedModel = trainingPipeline.Fit(trainingData);
-
-            // Evaluate the model
-            var predictions = trainedModel.Transform(testData);
-            var metrics = mlContext.BinaryClassification.Evaluate(data: predictions, labelColumnName: "Label", scoreColumnName: "Score");
-
-            // Display model accuracy stats
-            ConsoleHelper.PrintBinaryClassificationMetrics(trainer.ToString(), metrics);
+            EvaluateModel(mlContext, testData, trainer, trainedModel);
 
             // Persist the trained model to a .ZIP file
             mlContext.Model.Save(trainedModel, trainingData.Schema, ModelPath);
@@ -56,6 +51,16 @@ namespace SentimentAnalysisConsoleApp
             Console.WriteLine("The model is saved to {0}", ModelPath);
 
             TestPrediction(mlContext, trainedModel);
+        }
+
+        private static void EvaluateModel(MLContext mlContext, IDataView testData, SdcaLogisticRegressionBinaryTrainer trainer, ITransformer trainedModel)
+        {
+            // Evaluate the model
+            var predictions = trainedModel.Transform(testData);
+            var metrics = mlContext.BinaryClassification.Evaluate(data: predictions, labelColumnName: "Label", scoreColumnName: "Score");
+
+            // Display model accuracy stats
+            ConsoleHelper.PrintBinaryClassificationMetrics(trainer.ToString(), metrics);
         }
 
         private static void TestPrediction(MLContext mlContext, ITransformer trainedModel)
