@@ -34,14 +34,7 @@ namespace SentimentAnalysisConsoleApp
             IDataView testData = trainTestSplit.TestSet;
 
             // Data preparation         
-            var dataProcessPipeline = mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", new TextFeaturizingEstimator.Options 
-                                        {
-                                            CaseMode = TextNormalizingEstimator.CaseMode.Lower,
-										    //NOTE: not exportable to ONNX
-										    //KeepNumbers = false,
-										    //KeepPunctuations = false,
-										    KeepDiacritics = true
-                                        }, nameof(SentimentIssue.Text));
+            var dataProcessPipeline = mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: nameof(SentimentIssue.Text));
 
             // Select algorithm and configure model builder                            
             var trainer = mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(labelColumnName: "Label", featureColumnName: "Features");
@@ -59,17 +52,14 @@ namespace SentimentAnalysisConsoleApp
 
             // Persist the trained model to a .ZIP file
             mlContext.Model.Save(trainedModel, trainingData.Schema, ModelPath);
-            
-           
-
-            using (var filestream = File.Open("mymodel.onnx", FileMode.OpenOrCreate))
-            {
-                mlContext.Model.ConvertToOnnx(trainedModel, trainingData, filestream);
-                Console.Write( "onnx model generated");
-            }
 
             Console.WriteLine("The model is saved to {0}", ModelPath);
 
+            TestPrediction(mlContext, trainedModel);
+        }
+
+        private static void TestPrediction(MLContext mlContext, ITransformer trainedModel)
+        {
             // TRY IT: Make a single test prediction, loading the model from .ZIP file
             SentimentIssue sampleStatement = new SentimentIssue { Text = "machine learning is amazing!" };
 
