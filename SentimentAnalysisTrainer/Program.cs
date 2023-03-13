@@ -4,19 +4,18 @@ using Microsoft.ML;
 using SentimentAnalysisConsoleApp.DataStructures;
 using Common;
 using static Microsoft.ML.DataOperationsCatalog;
-using Microsoft.ML.Transforms.Text;
 using Microsoft.ML.Trainers;
 
 namespace SentimentAnalysisConsoleApp
 {
     internal static class Program
     {
-        private static readonly string BaseDatasetsRelativePath = @"../../../../Data";
+        private static readonly string BaseDatasetsRelativePath = @"Data";
         private static readonly string DataRelativePath = $"{BaseDatasetsRelativePath}/wikiDetoxAnnotated40kRows.tsv";
 
         private static readonly string DataPath = GetAbsolutePath(DataRelativePath);
 
-        private static readonly string BaseModelsRelativePath = @"../../../../MLModels";
+        private static readonly string BaseModelsRelativePath = @"../../../MLModels";
         private static readonly string ModelRelativePath = $"{BaseModelsRelativePath}/SentimentModel.zip";
 
         private static readonly string ModelPath = GetAbsolutePath(ModelRelativePath);
@@ -38,7 +37,10 @@ namespace SentimentAnalysisConsoleApp
             var dataProcessPipeline = mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: nameof(SentimentIssue.Text));
 
             // Select algorithm and configure model builder                            
-            var trainer = mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(labelColumnName: "Label", featureColumnName: "Features");
+            //var trainer = mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(labelColumnName: "Label", featureColumnName: "Features");
+            //var trainer = mlContext.BinaryClassification.Trainers.SgdCalibrated(labelColumnName: "Label", featureColumnName: "Features");
+            //var trainer = mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(labelColumnName: "Label", featureColumnName: "Features");
+            var trainer = mlContext.BinaryClassification.Trainers.AveragedPerceptron(labelColumnName: "Label", featureColumnName: "Features");
             var trainingPipeline = dataProcessPipeline.Append(trainer);
 
             // Train the model
